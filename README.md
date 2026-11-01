@@ -75,8 +75,4 @@ src/app/
 ```
 
 ## Possible next steps
-
-- Unit tests for `rm-api.utils.ts`, `roleGuard` and the services (Vitest is already set up)
-- Component/e2e tests (Playwright) with a mocked API
-- Sortable episode columns
-- An HTTP retry/backoff interceptor for the API's rate limiting
+- TODO
