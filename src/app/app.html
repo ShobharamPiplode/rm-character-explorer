@@ -1,0 +1,47 @@
+<a class="skip-link" href="#main">Skip to content</a>
+
+<header class="topbar">
+  <div class="topbar-inner">
+    <a class="brand" [routerLink]="urls.CHARACTERS" aria-label="Character Explorer, home">
+      <span class="brand-mark" aria-hidden="true">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2">
+          <circle cx="12" cy="12" r="8" />
+          <circle cx="12" cy="12" r="3.5" />
+        </svg>
+      </span>
+      <span class="brand-text">Character Explorer</span>
+    </a>
+
+    <div class="role">
+      <span class="role-label" id="role-label">Role</span>
+      <!-- Tablet/desktop: segmented switch -->
+      <div class="segmented role-switch" role="group" aria-labelledby="role-label">
+        @for (role of roles; track role) {
+          <button
+            type="button"
+            [attr.aria-pressed]="authService.role() === role"
+            (click)="changeRole(role)"
+          >
+            {{ roleLabels[role] }}
+          </button>
+        }
+      </div>
+      <!-- Phone: compact dropdown -->
+      <label class="role-select">
+        <span class="visually-hidden">Simulated role</span>
+        <select [value]="authService.role()" (change)="changeRole($any($event.target).value)">
+          @for (role of roles; track role) {
+            <option [value]="role">{{ roleLabels[role] }}</option>
+          }
+        </select>
+        <mat-icon aria-hidden="true">expand_more</mat-icon>
+      </label>
+    </div>
+
+    <app-global-search class="search" />
+  </div>
+</header>
+
+<main id="main" class="content" tabindex="-1">
+  <router-outlet />
+</main>

@@ -1,0 +1,100 @@
+:host {
+  display: flex;
+  justify-content: center;
+  padding: 48px 0;
+}
+
+.denied {
+  max-width: 560px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+  text-align: center;
+}
+
+.icon {
+  width: 72px;
+  height: 72px;
+  border-radius: 50%;
+  background: #fdecea;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  mat-icon {
+    font-size: 32px;
+    width: 32px;
+    height: 32px;
+    color: #a3311f;
+  }
+}
+
+.eyebrow {
+  margin: 0;
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: #a3311f;
+}
+
+h1 {
+  margin: 0;
+  font-family: var(--rm-display);
+  font-weight: 700;
+  font-size: 32px;
+  line-height: 1.2;
+}
+
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 12px;
+  margin-top: 8px;
+  .btn {
+    min-height: 48px;
+    font-size: 15px;
+  }
+}
+
+.requested {
+  margin: 0;
+  font-size: 13px;
+  color: var(--rm-muted);
+}
+
+// Tablet: the message sits in a card, buttons go full width.
+@media (max-width: 1023px) {
+  :host {
+    padding: 32px 0;
+  }
+  .denied {
+    width: 100%;
+    max-width: 520px;
+    box-sizing: border-box;
+    padding: 40px 32px;
+    background: var(--rm-surface);
+    border: 1px solid var(--rm-border);
+    border-radius: 20px;
+  }
+  h1 {
+    font-size: 28px;
+  }
+  .actions {
+    flex-direction: column;
+    align-self: stretch;
+  }
+}
+
+@media (max-width: 599px) {
+  :host {
+    padding: 8px 0;
+  }
+  .denied {
+    padding: 28px 20px;
+  }
+  h1 {
+    font-size: 24px;
+  }
+}

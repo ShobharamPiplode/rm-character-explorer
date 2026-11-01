@@ -1,0 +1,174 @@
+<header class="list-header">
+  <div class="heading">
+    <h1 class="page-title">All characters</h1>
+    <p class="subtle">{{ summary() }}</p>
+    <!-- Announces searches and errors, but not the "showing N" that changes on every scroll page. -->
+    <span class="visually-hidden" role="status">{{ announcement() }}</span>
+  </div>
+
+  <div class="segmented outlined" role="group" aria-label="Layout">
+    <button
+      type="button"
+      aria-label="Grid view"
+      [attr.aria-pressed]="stateService.viewMode() === 'grid'"
+      (click)="setView('grid')"
+    >
+      <mat-icon aria-hidden="true">grid_view</mat-icon>
+    </button>
+    <button
+      type="button"
+      aria-label="List view"
+      [attr.aria-pressed]="stateService.viewMode() === 'list'"
+      (click)="setView('list')"
+    >
+      <mat-icon aria-hidden="true">format_list_bulleted</mat-icon>
+    </button>
+  </div>
+</header>
+
+@if (!authService.isAdmin()) {
+  <p class="viewer-note" role="note">
+    <mat-icon aria-hidden="true">lock</mat-icon>
+    <span
+      >You’re signed in as <strong>Viewer</strong>. You can browse the list; character details need
+      Admin access.</span
+    >
+  </p>
+}
+
+@if (firstLoad()) {
+  <mat-progress-bar mode="indeterminate" aria-label="Loading characters" />
+}
+
+@if (failed() && !results().length) {
+  <section class="state-panel" role="alert">
+    <mat-icon aria-hidden="true">cloud_off</mat-icon>
+    <h2>Something went wrong loading characters</h2>
+    <p>Check your connection and try again.</p>
+    <button class="btn" type="button" (click)="retry()">Retry</button>
+  </section>
+} @else if (noMatches()) {
+  <section class="state-panel">
+    <mat-icon aria-hidden="true">search_off</mat-icon>
+    <h2>No characters match “{{ name() }}”</h2>
+    <p>Check the spelling or try a shorter name.</p>
+  </section>
+} @else if (stateService.viewMode() === 'grid') {
+  <ul class="grid" [attr.aria-busy]="loading()" aria-label="Characters">
+    @for (character of results(); track character.id) {
+      <li [id]="'character-' + character.id">
+        <a
+          class="card"
+          [class.selected]="stateService.selectedCharacterId() === character.id"
+          [routerLink]="[urls.CHARACTERS, character.id]"
+          (click)="selectCharacter(character)"
+          [attr.aria-label]="linkLabel(character)"
+        >
+          <div class="card-media" [class]="'tint-' + (character.id % 6)">
+            <app-avatar
+              [name]="character.name"
+              [id]="character.id"
+              [src]="character.image"
+              [size]="84"
+            />
+            <app-status-badge class="card-status" variant="pill" [status]="character.status" />
+            @if (!authService.isAdmin()) {
+              <span class="card-lock" title="Admin only">
+                <mat-icon aria-hidden="true">lock</mat-icon>
+              </span>
+            }
+          </div>
+          <div class="card-body">
+            <h2 class="card-name">{{ character.name }}</h2>
+            <dl class="facts">
+              <div>
+                <dt>Species</dt>
+                <dd>{{ character.species }}</dd>
+              </div>
+              <div>
+                <dt>Gender</dt>
+                <dd>{{ character.gender }}</dd>
+              </div>
+              <div>
+                <dt>Episodes</dt>
+                <dd>{{ character.episode.length }}</dd>
+              </div>
+            </dl>
+          </div>
+        </a>
+      </li>
+    }
+  </ul>
+} @else {
+  <div class="table panel">
+    <div class="table-head" aria-hidden="true">
+      <span class="col-name">Name</span>
+      <span>Status</span>
+      <span>Species</span>
+      <span>Gender</span>
+      <span class="num">Episodes</span>
+    </div>
+    <ul class="rows" [attr.aria-busy]="loading()" aria-label="Characters">
+      @for (character of results(); track character.id) {
+        <li [id]="'character-' + character.id">
+          <a
+            class="row"
+            [class.selected]="stateService.selectedCharacterId() === character.id"
+            [routerLink]="[urls.CHARACTERS, character.id]"
+            (click)="selectCharacter(character)"
+            [attr.aria-label]="linkLabel(character)"
+          >
+            <app-avatar
+              [name]="character.name"
+              [id]="character.id"
+              [src]="character.image"
+              [size]="40"
+            />
+            <span class="row-name">
+              <span class="row-name-text">{{ character.name }}</span>
+              @if (!authService.isAdmin()) {
+                <mat-icon class="row-lock" aria-hidden="true">lock</mat-icon>
+              }
+            </span>
+            <span class="row-meta">
+              <app-status-badge [status]="character.status" />
+              <span class="sep" aria-hidden="true">·</span>
+              <span>{{ character.species }}</span>
+              <span class="sep" aria-hidden="true">·</span>
+              <span>{{ character.gender }}</span>
+            </span>
+            <span class="row-eps">
+              <strong>{{ character.episode.length }}</strong>
+              <small>episodes</small>
+            </span>
+          </a>
+        </li>
+      }
+    </ul>
+  </div>
+}
+
+@if (results().length) {
+  <div class="more" #sentinel>
+    @if (hasMore()) {
+      @if (failed()) {
+        <p class="subtle" role="alert">Couldn’t load the next page.</p>
+        <button class="btn" type="button" (click)="retry()">Try again</button>
+      } @else {
+        <button class="btn" type="button" [attr.aria-disabled]="loading()" (click)="loadMore()">
+          @if (loading()) {
+            <mat-icon class="spin" aria-hidden="true">progress_activity</mat-icon> Loading…
+          } @else {
+            Load more characters
+          }
+        </button>
+        <span class="hint"
+          >Page {{ loadedPages() }} of {{ totalPages() }} · next pages load automatically as you
+          scroll</span
+        >
+      }
+    } @else {
+      <span class="hint">That’s all {{ total().toLocaleString() }} characters.</span>
+    }
+  </div>
+}

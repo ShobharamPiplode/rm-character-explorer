@@ -1,0 +1,28 @@
+.not-found {
+  display: grid;
+  place-content: center;
+  justify-items: center;
+  min-height: 70vh;
+  padding: 1.5rem;
+  text-align: center;
+
+  &__code {
+    margin-bottom: 0.75rem;
+    font: var(--mat-sys-display-large);
+    font-size: 4.5rem;
+    line-height: 1;
+    color: var(--mat-sys-primary);
+    filter: drop-shadow(0 0 25px color-mix(in srgb, var(--mat-sys-primary) 50%, transparent));
+
+    @media (min-width: 600px) {
+      font-size: 6rem;
+    }
+  }
+
+  &__title {
+    margin: 0 0 0.5rem;
+    font: var(--mat-sys-headline-medium);
+    font-weight: 800;
+    color: var(--mat-sys-on-surface);
+  }
+}

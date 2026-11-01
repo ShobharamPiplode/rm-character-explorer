@@ -1,0 +1,163 @@
+<a class="back" [routerLink]="urls.CHARACTERS" [queryParams]="stateService.lastListParams()">
+  <mat-icon aria-hidden="true">chevron_left</mat-icon> Back to all characters
+</a>
+
+@if (character.isLoading()) {
+  <mat-progress-bar mode="indeterminate" aria-label="Loading character" />
+} @else if (characterNotFound()) {
+  <section class="state-panel" role="alert">
+    <mat-icon aria-hidden="true">person_off</mat-icon>
+    <h1>Character not found</h1>
+    @if (id()) {
+      <p>There is no character with id {{ id() }}.</p>
+    } @else {
+      <p>That isn’t a valid character id.</p>
+    }
+  </section>
+} @else if (character.error()) {
+  <section class="state-panel" role="alert">
+    <mat-icon aria-hidden="true">cloud_off</mat-icon>
+    <h1>Could not load this character</h1>
+    <button class="btn" type="button" (click)="character.reload()">Retry</button>
+  </section>
+} @else if (character.hasValue()) {
+  @let c = character.value();
+  <section class="profile panel" aria-labelledby="character-name">
+    <app-avatar
+      class="profile-avatar"
+      [name]="c.name"
+      [id]="c.id"
+      [src]="c.image"
+      [size]="112"
+      priority
+    />
+    <div class="profile-info">
+      <div class="profile-title">
+        <h1 id="character-name" class="name">{{ c.name }}</h1>
+        <app-status-badge variant="soft" [status]="c.status" />
+      </div>
+      <dl class="facts">
+        <div>
+          <dt>Species</dt>
+          <dd>{{ c.species }}{{ c.type ? ' · ' + c.type : '' }}</dd>
+        </div>
+        <div>
+          <dt>Gender</dt>
+          <dd>{{ c.gender }}</dd>
+        </div>
+        <div>
+          <dt>Total episodes</dt>
+          <dd>{{ c.episode.length }}</dd>
+        </div>
+        <div class="wide">
+          <dt>Origin</dt>
+          <dd>{{ c.origin.name }}</dd>
+        </div>
+      </dl>
+    </div>
+  </section>
+
+  <section class="episodes panel" aria-labelledby="episodes-heading">
+    <div class="episodes-header">
+      <div>
+        <h2 id="episodes-heading">Episodes</h2>
+        <p class="subtle count" role="status" aria-live="polite">
+          @if (episodes.isLoading()) {
+            Loading episodes…
+          } @else if (filter()) {
+            {{ visibleEpisodes().length }} of {{ allEpisodes().length }} match “{{ filter() }}”
+          } @else {
+            {{ allEpisodes().length }} episodes
+          }
+        </p>
+      </div>
+      <label class="field filter">
+        <span class="visually-hidden">Filter episodes by name</span>
+        <mat-icon class="field-icon" aria-hidden="true">filter_alt</mat-icon>
+        <input
+          #filterInput
+          type="search"
+          placeholder="Filter by episode name"
+          autocomplete="off"
+          [value]="filter()"
+          (input)="onFilter($event)"
+        />
+        @if (filter()) {
+          <button
+            class="field-clear"
+            type="button"
+            aria-label="Clear filter"
+            (click)="clearFilter(filterInput)"
+          >
+            <mat-icon>close</mat-icon>
+          </button>
+        }
+      </label>
+    </div>
+
+    @if (episodes.isLoading()) {
+      <mat-progress-bar mode="indeterminate" aria-label="Loading episodes" />
+    } @else if (episodes.error()) {
+      <div class="inline-state" role="alert">
+        <p>Could not load episodes.</p>
+        <button class="btn" type="button" (click)="episodes.reload()">Retry</button>
+      </div>
+    } @else if (!allEpisodes().length) {
+      <div class="inline-state">
+        <p>This character doesn’t appear in any episodes.</p>
+      </div>
+    } @else if (!visibleEpisodes().length) {
+      <div class="inline-state">
+        <p>No episodes match “{{ filter() }}”.</p>
+        <button class="btn" type="button" (click)="clearFilter(filterInput)">Clear filter</button>
+      </div>
+    } @else {
+      <table aria-labelledby="episodes-heading">
+        <thead>
+          <tr>
+            <th scope="col">Name</th>
+            <th scope="col">Air date</th>
+            <th scope="col">Episode</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (episode of pagedEpisodes(); track episode.id) {
+            <tr>
+              <td class="ep-name">{{ episode.name }}</td>
+              <td class="ep-date">{{ episode.air_date }}</td>
+              <td class="ep-code">
+                <code>{{ episode.episode }}</code>
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+
+      @if (pageCount() > 1) {
+        <div class="pager">
+          <span role="status">{{ rangeLabel() }}</span>
+          <div class="pager-buttons">
+            <button
+              class="btn icon"
+              type="button"
+              aria-label="Previous page"
+              [attr.aria-disabled]="pageIndex() === 0"
+              (click)="goToPage(pageIndex() - 1)"
+            >
+              <mat-icon aria-hidden="true">chevron_left</mat-icon>
+            </button>
+            <button
+              class="btn icon"
+              type="button"
+              aria-label="Next page"
+              [attr.aria-disabled]="pageIndex() >= pageCount() - 1"
+              (click)="goToPage(pageIndex() + 1)"
+            >
+              <mat-icon aria-hidden="true">chevron_right</mat-icon>
+            </button>
+          </div>
+        </div>
+      }
+    }
+  </section>
+}

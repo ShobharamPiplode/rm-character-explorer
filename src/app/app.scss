@@ -1,0 +1,161 @@
+:host {
+  display: flex;
+  flex-direction: column;
+  min-height: 100%;
+}
+
+.topbar {
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  background: var(--rm-surface);
+  border-bottom: 1px solid var(--rm-border);
+}
+
+// Desktop: brand · role · search (search fills the rest).
+// Tablet:  brand · search · role.
+// Phone:   brand + role dropdown, search on its own row.
+.topbar-inner {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 12px 24px;
+  display: flex;
+  align-items: center;
+  gap: 12px 20px;
+}
+
+.brand {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  flex: none;
+  text-decoration: none;
+  color: var(--rm-ink);
+}
+
+.brand-mark {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: var(--rm-accent);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.brand-text {
+  font-family: var(--rm-display);
+  font-weight: 700;
+  font-size: 18px;
+  white-space: nowrap;
+}
+
+.role {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  flex: none;
+}
+
+.role-label {
+  font-size: 13px;
+  color: var(--rm-muted);
+}
+
+.role-select {
+  display: none;
+  position: relative;
+  select {
+    appearance: none;
+    height: 44px;
+    padding: 0 36px 0 14px;
+    border: 1px solid var(--rm-border-strong);
+    border-radius: 10px;
+    background: var(--rm-surface);
+    font-weight: 600;
+    font-size: 14px;
+    cursor: pointer;
+  }
+
+  mat-icon {
+    position: absolute;
+    right: 8px;
+    top: 50%;
+    transform: translateY(-50%);
+    font-size: 20px;
+    width: 20px;
+    height: 20px;
+    color: var(--rm-muted);
+    pointer-events: none;
+  }
+}
+
+.search {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+@media (max-width: 1023px) {
+  .role {
+    order: 3;
+  }
+  .search {
+    order: 2;
+  }
+}
+
+@media (max-width: 599px) {
+  .topbar-inner {
+    flex-wrap: wrap;
+    justify-content: space-between;
+    padding: 12px 16px;
+  }
+  .brand-mark {
+    width: 28px;
+    height: 28px;
+  }
+  .brand-text {
+    font-size: 17px;
+  }
+  .role {
+    order: 2;
+  }
+  .role-label,
+  .role-switch {
+    display: none;
+  }
+  .role-select {
+    display: block;
+  }
+  .search {
+    order: 3;
+    flex-basis: 100%;
+  }
+}
+
+.content {
+  flex: 1;
+  width: 100%;
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 28px 24px 48px;
+  box-sizing: border-box;
+  outline: none;
+  @media (max-width: 599px) {
+    padding: 16px 16px 32px;
+  }
+}
+
+.skip-link {
+  position: absolute;
+  left: -9999px;
+  &:focus {
+    left: 16px;
+    top: 8px;
+    z-index: 100;
+    padding: 8px 12px;
+    background: var(--rm-accent);
+    color: #fff;
+    border-radius: 8px;
+  }
+}

@@ -1,0 +1,14 @@
+<section class="denied" aria-labelledby="denied-title">
+  <span class="icon" aria-hidden="true"><mat-icon>lock</mat-icon></span>
+  <p class="eyebrow">Error 403 · Access denied</p>
+  <h1 id="denied-title">You don’t have permission to view this page</h1>
+
+  <div class="actions">
+    <a class="btn primary" [routerLink]="urls.CHARACTERS">Back to Character list</a>
+    <button class="btn" type="button" (click)="switchToAdmin()">Switch to Admin</button>
+  </div>
+
+  @if (from()) {
+    <p class="requested">Requested: {{ from() }}</p>
+  }
+</section>

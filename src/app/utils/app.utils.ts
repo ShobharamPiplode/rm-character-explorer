@@ -1,0 +1,34 @@
+export const APP_NAME = 'Rick & Morty Character Explorer';
+
+export function pageTitle(page: string | undefined): string {
+  return page ? `${page} · ${APP_NAME}` : APP_NAME;
+}
+
+/** Two-letter initials: "Rick Sanchez" -> "RS", "Alexander" -> "A". */
+export function initialsOf(name: string): string {
+  return name
+    .split(/\s+/)
+    .filter(Boolean)
+    .slice(0, 2)
+    .map((w) => w[0]!.toUpperCase())
+    .join('');
+}
+
+/** Reads a sessionStorage value, or null if it is missing, not one of `allowed`, or storage is unavailable. */
+export function readSessionValue<T extends string>(key: string, allowed: readonly T[]): T | null {
+  try {
+    const value = sessionStorage.getItem(key);
+    return allowed.includes(value as T) ? (value as T) : null;
+  } catch {
+    return null;
+  }
+}
+
+/** Writes a sessionStorage value; if storage is unavailable (private mode etc.) the app keeps working in memory. */
+export function writeSessionValue(key: string, value: string): void {
+  try {
+    sessionStorage.setItem(key, value);
+  } catch {
+    /* storage unavailable — ignore */
+  }
+}

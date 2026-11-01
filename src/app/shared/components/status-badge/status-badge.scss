@@ -1,0 +1,51 @@
+// variant="plain": dot + text (list rows). "pill": white chip (over card tint). "soft": tinted chip (details).
+:host {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  white-space: nowrap;
+  --dot: var(--rm-unknown);
+}
+:host(.alive) {
+  --dot: var(--rm-alive);
+}
+:host(.dead) {
+  --dot: var(--rm-dead);
+}
+
+.dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--dot);
+  flex: none;
+}
+
+:host(.pill),
+:host(.soft) {
+  height: 26px;
+  padding: 0 10px;
+  border-radius: 13px;
+  font-size: 12px;
+  font-weight: 600;
+}
+:host(.pill) {
+  background: var(--rm-surface);
+  color: var(--rm-ink);
+}
+:host(.soft) {
+  height: 28px;
+  padding: 0 12px;
+  border-radius: 14px;
+  font-size: 13px;
+  background: var(--rm-chip);
+  color: var(--rm-ink-2);
+}
+:host(.soft.alive) {
+  background: #e8f5ec;
+  color: #145c36;
+}
+:host(.soft.dead) {
+  background: #fdecea;
+  color: #8e2a1b;
+}
