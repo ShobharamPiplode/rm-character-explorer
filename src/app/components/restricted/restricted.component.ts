@@ -26,10 +26,13 @@ export class RestrictedComponent {
 
   /**
    * Roles are simulated, so the reviewer can switch and go straight to what was blocked.
-   * Falls back to the character list when the page was opened directly (no `from`).
+   * Falls back to the character list when the page was opened directly (no `from`),
+   * and verifies `from` is a safe relative path to prevent unexpected navigation or open redirects.
    */
   protected switchToAdmin(): void {
     this.authService.setRole('admin');
-    this.router.navigateByUrl(this.from() || AppConstants.AppUrls.CHARACTERS);
+    const target = this.from();
+    const isSafeRelativeUrl = !!target && target.startsWith('/') && !target.startsWith('//');
+    this.router.navigateByUrl(isSafeRelativeUrl ? target : AppConstants.AppUrls.CHARACTERS);
   }
 }

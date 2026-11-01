@@ -121,7 +121,7 @@ export class CharacterListComponent {
       });
     });
 
-    // Append each page as it arrives.
+    // Append each page as it arrives, deduplicating to avoid duplicate key issues in @for.
     effect(() => {
       if (!this.characters.hasValue()) return;
       const page = this.characters.value();
@@ -129,12 +129,14 @@ export class CharacterListComponent {
         const req = this.request();
         const cache = this.stateService.listCache();
         if (!req || !cache || cache.name !== req.name || req.page !== cache.pages + 1) return;
+        const existingIds = new Set(cache.results.map((c) => c.id));
+        const newResults = page.results.filter((c) => !existingIds.has(c.id));
         this.stateService.listCache.set({
           name: cache.name,
           pages: req.page,
           totalPages: page.info.pages,
           count: page.info.count,
-          results: [...cache.results, ...page.results],
+          results: [...cache.results, ...newResults],
         });
       });
     });
@@ -148,7 +150,7 @@ export class CharacterListComponent {
     effect((onCleanup) => {
       this.loadedPages();
       const el = this.sentinel()?.nativeElement;
-      if (!el || typeof IntersectionObserver === 'undefined') return;
+      if (!this.hasMore() || !el || typeof IntersectionObserver === 'undefined') return;
       const observer = new IntersectionObserver(
         (entries) => entries.some((e) => e.isIntersecting) && this.loadMore(),
         { rootMargin: '400px 0px' },

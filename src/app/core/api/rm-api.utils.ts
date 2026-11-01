@@ -3,11 +3,14 @@ import { Episode } from '../models/episode.model';
 
 /** Pure helpers for Rick & Morty API responses; requests themselves go through RmApiService. */
 
-/** Extracts numeric ids from episode resource URLs (".../api/episode/28" -> 28). */
+/** Extracts numeric ids from episode resource URLs (".../api/episode/28" -> 28), resilient to trailing slashes. */
 export function episodeIdsFromUrls(urls: readonly string[]): number[] {
   return urls
-    .map((url) => Number(url.substring(url.lastIndexOf('/') + 1)))
-    .filter((id) => Number.isInteger(id) && id > 0);
+    .map((url) => {
+      const match = url.match(/\/(\d+)\/?$/);
+      return match ? Number(match[1]) : 0;
+    })
+    .filter((id) => id > 0);
 }
 
 /** The multi-id endpoint returns an object (not an array) when only one id is requested. */
