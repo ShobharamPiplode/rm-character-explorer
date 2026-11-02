@@ -1,8 +1,6 @@
 import { HttpErrorResponse } from '@angular/common/http';
 import { Episode } from '../models/episode.model';
 
-/** Pure helpers for Rick & Morty API responses; requests themselves go through RmApiService. */
-
 /** Extracts numeric ids from episode resource URLs (".../api/episode/28" -> 28), resilient to trailing slashes. */
 export function episodeIdsFromUrls(urls: readonly string[]): number[] {
   return urls
@@ -15,14 +13,18 @@ export function episodeIdsFromUrls(urls: readonly string[]): number[] {
 
 /** The multi-id endpoint returns an object (not an array) when only one id is requested. */
 export function normalizeEpisodes(response: Episode | Episode[] | undefined): Episode[] {
-  if (!response) return [];
+  if (!response) {
+    return []; 
+  }
   return Array.isArray(response) ? response : [response];
 }
 
 /** Client-side, case-insensitive free-text filter on episode name. */
-export function filterEpisodesByName(episodes: readonly Episode[], term: string): Episode[] {
-  const needle = term.trim().toLowerCase();
-  if (!needle) return [...episodes];
+export function filterEpisodesByName(episodes: readonly Episode[], searchTerm: string): Episode[] {
+  const needle = searchTerm.trim().toLowerCase();
+  if (!needle) {
+    return [...episodes];
+  } 
   return episodes.filter((e) => e.name.toLowerCase().includes(needle));
 }
 
