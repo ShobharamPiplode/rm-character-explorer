@@ -20,7 +20,7 @@ export class RestrictedComponent {
   /** Route paths used by the template's router links. */
   protected readonly urls = AppConstants.AppUrls;
 
-  // Query params set by roleGuard, bound via withComponentInputBinding, e.g. '/restricted?from=/characters/42&required=admin'.
+  // Query params set by roleGuard, bound via withComponentInputBinding, e.g. '/restricted?from=/characters/42'.
   /** The URL that was blocked. */
   readonly from = input<string | undefined>();
 
