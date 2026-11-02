@@ -1,9 +1,10 @@
-// variant="plain": dot + text (list rows). "pill": white chip (over card tint). "soft": tinted chip (details).
 :host {
   display: inline-flex;
   align-items: center;
   gap: 6px;
   white-space: nowrap;
+  // The API sends "unknown" in lowercase, unlike "Alive" / "Dead".
+  text-transform: capitalize;
   --dot: var(--rm-unknown);
 }
 :host(.alive) {
@@ -21,23 +22,21 @@
   flex: none;
 }
 
-:host(.pill),
-:host(.soft) {
+:host(.pill) {
   height: 26px;
   padding: 0 10px;
-  border-radius: 13px;
+  border-radius: 999px;
   font-size: 12px;
   font-weight: 600;
-}
-:host(.pill) {
   background: var(--rm-surface);
   color: var(--rm-ink);
 }
 :host(.soft) {
   height: 28px;
   padding: 0 12px;
-  border-radius: 14px;
+  border-radius: 999px;
   font-size: 13px;
+  font-weight: 600;
   background: var(--rm-chip);
   color: var(--rm-ink-2);
 }
