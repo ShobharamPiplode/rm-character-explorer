@@ -15,7 +15,7 @@ import { StateService } from '../../core/services/state.service';
 import { AvatarComponent } from '../../shared/components/avatar/avatar';
 import { StatusBadgeComponent } from '../../shared/components/status-badge/status-badge';
 import { AppConstants } from '../../utils/constants';
-import { normalizeEpisodes, filterEpisodesByName, isNotFound } from '../../core/api/rm-api.utils';
+import { isNotFound } from '../../core/api/rm-api.utils';
 
 /** Number of episodes shown per page in the episode table. */
 const EPISODES_PER_PAGE = 10;
@@ -53,17 +53,18 @@ export class CharacterDetailsComponent {
 
   /** Episode name filter typed by the user; reset when the route opens another character. */
   protected readonly filter = linkedSignal({ source: this.id, computation: () => '' });
-  /** Zero-based index of the current episode page; reset when the route opens another character. */
-  protected readonly pageIndex = linkedSignal({ source: this.id, computation: () => 0 });
 
   /** Episodes as an array (the API returns a single object when there is only one). */
   protected readonly allEpisodes = computed(() =>
-    this.episodes.hasValue() ? normalizeEpisodes(this.episodes.value()) : [],
+    this.episodes.hasValue() ? [this.episodes.value()].flat() : [],
   );
-  /** Episodes matching the filter, before pagination. */
-  protected readonly visibleEpisodes = computed(() =>
-    filterEpisodesByName(this.allEpisodes(), this.filter()),
-  );
+  /** Episodes whose name contains the filter (case-insensitive), before pagination. */
+  protected readonly visibleEpisodes = computed(() => {
+    const needle = this.filter().trim().toLowerCase();
+    return this.allEpisodes().filter((e) => e.name.toLowerCase().includes(needle));
+  });
+  /** Zero-based episode page; back to the first page whenever the filtered list changes. */
+  protected readonly pageIndex = linkedSignal({ source: this.visibleEpisodes, computation: () => 0 });
   /** Number of pages needed for the filtered episodes. */
   protected readonly pageCount = computed(() =>
     Math.ceil(this.visibleEpisodes().length / EPISODES_PER_PAGE),
@@ -100,17 +101,14 @@ export class CharacterDetailsComponent {
     }
   }
 
-  /** Applies the typed filter and jumps back to the first page. */
+  /** Applies the typed filter (paging resets via `pageIndex`). */
   protected onFilter(event: Event): void {
     this.filter.set((event.target as HTMLInputElement).value);
-    this.pageIndex.set(0);
   }
 
-  /** Clears the filter input, resets paging and returns focus to the input. */
+  /** Clears the filter and returns focus to its input. */
   protected clearFilter(input: HTMLInputElement): void {
-    input.value = '';
     this.filter.set('');
-    this.pageIndex.set(0);
     input.focus();
   }
 }

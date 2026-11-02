@@ -1,5 +1,4 @@
 import { HttpErrorResponse } from '@angular/common/http';
-import { Episode } from '../models/episode.model';
 
 /** Extracts numeric ids from episode resource URLs (".../api/episode/28" -> 28), resilient to trailing slashes. */
 export function episodeIdsFromUrls(urls: readonly string[]): number[] {
@@ -9,23 +8,6 @@ export function episodeIdsFromUrls(urls: readonly string[]): number[] {
       return match ? Number(match[1]) : 0;
     })
     .filter((id) => id > 0);
-}
-
-/** The multi-id endpoint returns an object (not an array) when only one id is requested. */
-export function normalizeEpisodes(response: Episode | Episode[] | undefined): Episode[] {
-  if (!response) {
-    return [];
-  }
-  return Array.isArray(response) ? response : [response];
-}
-
-/** Client-side, case-insensitive free-text filter on episode name. */
-export function filterEpisodesByName(episodes: readonly Episode[], searchTerm: string): Episode[] {
-  const needle = searchTerm.trim().toLowerCase();
-  if (!needle) {
-    return [...episodes];
-  }
-  return episodes.filter((e) => e.name.toLowerCase().includes(needle));
 }
 
 /** The API answers a search with no matches with HTTP 404 — that is "empty", not a failure. */

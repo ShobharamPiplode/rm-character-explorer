@@ -70,7 +70,7 @@ export class CharacterListComponent {
   protected readonly hasMore = computed(() => this.loadedPages() < this.totalPages());
 
   /** True while a page request is in flight. */
-  protected readonly loading = computed(() => this.characters.isLoading());
+  protected readonly loading = this.characters.isLoading;
   /** The API answers 404 when a search has no results; treat that as "no matches", not an error. */
   protected readonly noMatches = computed(
     () => isNotFound(this.characters.error()) && this.results().length === 0,
@@ -82,27 +82,26 @@ export class CharacterListComponent {
   /** Loading with nothing to show yet: the template shows the loading state instead of the list. */
   protected readonly firstLoad = computed(() => this.loading() && this.results().length === 0);
 
-  /** Visible status line above the list (count, search term and how many are shown). */
-  protected readonly summary = computed(() => {
+  /** Loading / no matches / error message, or null when there are results to describe. */
+  private readonly stateMessage = computed(() => {
     if (this.firstLoad()) return 'Loading characters…';
     if (this.noMatches()) return `No characters match “${this.name()}”`;
     if (this.failed() && !this.results().length) return 'Could not load characters';
-    const count = this.total().toLocaleString();
-    const shown = this.results().length;
-    return this.name()
-      ? `${count} results for “${this.name()}” · showing ${shown}`
-      : `${count} characters · showing ${shown}`;
+    return null;
   });
-
-  /** Live-region text: unlike `summary`, it stays the same while further pages are appended. */
-  protected readonly announcement = computed(() => {
-    if (this.firstLoad()) return 'Loading characters…';
-    if (this.noMatches()) return `No characters match “${this.name()}”`;
-    if (this.failed() && !this.results().length) return 'Could not load characters';
-    if (!this.results().length) return '';
+  /** e.g. "826 characters" or "107 results for “rick”". */
+  private readonly countText = computed(() => {
     const count = this.total().toLocaleString();
     return this.name() ? `${count} results for “${this.name()}”` : `${count} characters`;
   });
+  /** Visible status line above the list. */
+  protected readonly summary = computed(
+    () => this.stateMessage() ?? `${this.countText()} · showing ${this.results().length}`,
+  );
+  /** Live-region text: unlike `summary`, it stays the same while further pages are appended. */
+  protected readonly announcement = computed(
+    () => this.stateMessage() ?? (this.results().length ? this.countText() : ''),
+  );
 
   constructor() {
     // New search term -> start over at page 1, unless we already hold results for it
@@ -171,12 +170,8 @@ export class CharacterListComponent {
       // Put keyboard focus back on the card the user opened, unless they are busy elsewhere
       // (e.g. typing in the header search, which also lands here).
       const active = document.activeElement;
-      if (
-        !active ||
-        active === document.body ||
-        document.getElementById('main')?.contains(active)
-      ) {
-        item?.querySelector<HTMLElement>('a')?.focus({ preventScroll: true });
+      if (!active || active === document.body || document.getElementById('main')?.contains(active)) {
+        item?.querySelector('a')?.focus({ preventScroll: true });
       }
     });
   }
@@ -192,7 +187,7 @@ export class CharacterListComponent {
     this.stateService.viewMode.set(mode);
   }
 
-  /** Remembers the opened character so the list can scroll back to it later. */
+  /** Remembers the opened character so the list can highlight and scroll back to it. */
   protected selectCharacter(character: Character): void {
     this.stateService.selectedCharacterId.set(character.id);
   }
