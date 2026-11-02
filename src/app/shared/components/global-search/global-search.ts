@@ -1,4 +1,4 @@
-import { Component, ElementRef, inject, signal, viewChild } from '@angular/core';
+import { Component, inject, signal } from '@angular/core';
 import { takeUntilDestroyed, toObservable } from '@angular/core/rxjs-interop';
 import { NavigationEnd, Router } from '@angular/router';
 import { MatIconModule } from '@angular/material/icon';
@@ -25,16 +25,13 @@ import { AppConstants } from '../../../utils/constants';
         autocomplete="off"
       />
       @if (searchTerm()) {
-        <button class="field-clear" type="button" aria-label="Clear search" (click)="clear()">
+        <button class="field-clear" type="button" aria-label="Clear search" (click)="clear(searchInput)">
           <mat-icon>close</mat-icon>
         </button>
       }
     </label>
   `,
   styles: `
-    :host {
-      display: block;
-    }
     .field input {
       background: var(--rm-bg);
     }
@@ -44,7 +41,6 @@ export class GlobalSearchComponent {
   private readonly router = inject(Router);
   /** Raw input text, untrimmed, so the caret isn't disturbed while typing. */
   protected readonly searchTerm = signal('');
-  private readonly searchInput = viewChild.required<ElementRef<HTMLInputElement>>('searchInput');
 
   constructor() {
     // Typing -> debounced navigation. Skipped when the URL already holds the term: the URL -> box
@@ -73,10 +69,10 @@ export class GlobalSearchComponent {
   }
 
   /** Empties the box and drops the `name` filter immediately, keeping focus in the field. */
-  protected clear(): void {
+  protected clear(input: HTMLInputElement): void {
     this.searchTerm.set('');
     this.searchName('');
-    this.searchInput().nativeElement.focus();
+    input.focus();
   }
 
   /** Navigates to the list; other query params (e.g. from '/restricted?from=…') aren't carried over. */
