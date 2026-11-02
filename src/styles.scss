@@ -1,6 +1,3 @@
-// Include theming for Angular Material with `mat.theme()`.
-// Material is still used for icons, progress bars and the button-toggle behaviour; the
-// look of the app itself comes from the design tokens below (see the UX spec PDF).
 @use '@angular/material' as mat;
 
 html {
@@ -16,7 +13,6 @@ html {
     )
   );
 
-  // Design tokens (UX spec: light UI, one portal-green accent).
   --rm-bg: #f6f7f9;
   --rm-surface: #ffffff;
   --rm-ink: #16181d;
@@ -42,7 +38,6 @@ html {
 }
 
 body {
-  // The UX spec is light-only; opting out of dark keeps Material and the tokens consistent.
   color-scheme: light;
   background-color: var(--rm-bg);
   color: var(--rm-ink);
