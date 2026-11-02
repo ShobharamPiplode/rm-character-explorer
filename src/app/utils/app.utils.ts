@@ -8,17 +8,16 @@ export function pageTitle(page: string | undefined): string {
 export function initialsOf(name: string): string {
   return name
     .split(/\s+/)
-    .filter(Boolean)
     .slice(0, 2)
-    .map((w) => w[0]!.toUpperCase())
+    .map((w) => w.charAt(0).toUpperCase())
     .join('');
 }
 
 /** Reads a sessionStorage value, or null if it is missing, not one of `allowed`, or storage is unavailable. */
 export function readSessionValue<T extends string>(key: string, allowed: readonly T[]): T | null {
   try {
-    const value = sessionStorage.getItem(key);
-    return allowed.includes(value as T) ? (value as T) : null;
+    const value = sessionStorage.getItem(key) as T;
+    return allowed.includes(value) ? value : null;
   } catch {
     return null;
   }

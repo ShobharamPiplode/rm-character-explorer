@@ -1,4 +1,4 @@
-import { Component, DestroyRef, ElementRef, inject, signal, viewChild } from '@angular/core';
+import { Component, ElementRef, inject, signal, viewChild } from '@angular/core';
 import { takeUntilDestroyed, toObservable } from '@angular/core/rxjs-interop';
 import { NavigationEnd, Router } from '@angular/router';
 import { MatIconModule } from '@angular/material/icon';
@@ -6,9 +6,8 @@ import { debounceTime, distinctUntilChanged, filter, map } from 'rxjs';
 import { AppConstants } from '../../../utils/constants';
 
 /**
- * Header search box that keeps its text in sync with the `name` query param
- * of the characters list. Typing navigates to the list (debounced);
- * navigating (back/forward, deep links, leaving the list) updates the box.
+ * Header search box, kept in sync with the list's `?name=` query param: typing navigates to the
+ * list (debounced), and navigating (back/forward, deep links, leaving the list) updates the box.
  */
 @Component({
   selector: 'app-global-search',
@@ -48,71 +47,50 @@ export class GlobalSearchComponent {
   private readonly searchInput = viewChild.required<ElementRef<HTMLInputElement>>('searchInput');
 
   constructor() {
-    const destroyRef = inject(DestroyRef);
-
-    // User typing -> debounced URL update.
+    // Typing -> debounced navigation. Skipped when the URL already holds the term: the URL -> box
+    // sync below also sets searchTerm (e.g. to '' when opening a details page), and that must not
+    // navigate back to the list.
     toObservable(this.searchTerm)
       .pipe(
         map((v) => v.trim()),
         debounceTime(350),
         distinctUntilChanged(),
-        // Don't navigate when the URL already holds this term. searchTerm is also set by the
-        // URL -> input sync below, and this stream can't tell that apart from typing. E.g.
-        // opening '/characters/1' from '?name=rick' clears the box to ''; without this check
-        // that '' would navigate back to '/characters' and pull the user off the details page.
         filter((v) => v !== this.urlSearchTerm()),
-        takeUntilDestroyed(destroyRef),
+        takeUntilDestroyed(),
       )
       .subscribe((name) => this.searchName(name));
 
-    // URL change (back/forward, deep link, leaving the list) -> input value.
+    // URL change -> box. Compared trimmed so trailing spaces being typed aren't wiped out.
     this.router.events
       .pipe(
-        filter((e): e is NavigationEnd => e instanceof NavigationEnd),
-        takeUntilDestroyed(destroyRef),
+        filter((e) => e instanceof NavigationEnd),
+        takeUntilDestroyed(),
       )
       .subscribe(() => {
         const fromUrl = this.urlSearchTerm();
-        // Compare trimmed so trailing spaces the user is still typing aren't wiped out.
-        if (fromUrl !== this.searchTerm().trim()) {
-          this.searchTerm.set(fromUrl);
-        }
+        if (fromUrl !== this.searchTerm().trim()) this.searchTerm.set(fromUrl);
       });
   }
 
-  /** Empties the box and drops the `name` filter immediately, skipping the debounce. */
+  /** Empties the box and drops the `name` filter immediately, keeping focus in the field. */
   protected clear(): void {
     this.searchTerm.set('');
     this.searchName('');
-    // The clear button disappears with the text; keep focus in the field rather than <body>.
     this.searchInput().nativeElement.focus();
   }
 
-  /**
-   * Navigates to the characters list with the given name filter. An empty name
-   * removes the param. Other query params are deliberately not carried over, so
-   * searching from e.g. '/restricted?from=…' doesn't leak them onto the list URL.
-   */
+  /** Navigates to the list; other query params (e.g. from '/restricted?from=…') aren't carried over. */
   private searchName(name: string): void {
     this.router.navigate([AppConstants.AppUrls.CHARACTERS], {
       queryParams: { name: name || undefined },
     });
   }
 
-  /**
-   * The `name` query param of the current URL, or '' when not on the characters list.
-   *
-   * This component lives in the header, outside the router outlet, so it has no
-   * ActivatedRoute for the list page and reads the URL from the Router instead.
-   * `router.url` is parsed into a UrlTree, and the primary outlet's segments are
-   * joined back into a path without the query string or fragment, e.g.
-   *   '/characters?name=rick&page=2'  -> path 'characters'     -> 'rick'
-   *   '/characters/1?name=rick'       -> path 'characters/1'   -> '' (details page)
-   *   '/'                             -> path undefined        -> '' (no primary child)
-   */
+  /** The current `?name=` when on the characters list, otherwise ''. */
   private urlSearchTerm(): string {
-    const tree = this.router.parseUrl(this.router.url);
-    const path = tree.root.children['primary']?.segments.map((s) => s.path).join('/');
-    return `/${path}` === AppConstants.AppUrls.CHARACTERS ? (tree.queryParams['name'] ?? '') : '';
+    const url = this.router.url;
+    return url.split(/[?#]/)[0] === AppConstants.AppUrls.CHARACTERS
+      ? (this.router.parseUrl(url).queryParams['name'] ?? '')
+      : '';
   }
 }

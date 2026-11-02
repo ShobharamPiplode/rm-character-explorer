@@ -7,6 +7,9 @@ import { GlobalSearchComponent } from './shared/components/global-search/global-
 import { AuthService, Role, ROLE_LABELS, ROLES } from './core/services/auth.service';
 import { AppConstants } from './utils/constants';
 
+/** Path of a router URL without query string or fragment. */
+const pathOf = (url: string) => url.split(/[?#]/)[0];
+
 @Component({
   selector: 'app-root',
   imports: [RouterOutlet, RouterLink, MatIconModule, GlobalSearchComponent],
@@ -17,28 +20,26 @@ export class App {
   private readonly router = inject(Router);
   private readonly injector = inject(Injector);
   protected readonly authService = inject(AuthService);
-  protected readonly roles: readonly Role[] = ROLES;
+  protected readonly roles = ROLES;
   protected readonly roleLabels = ROLE_LABELS;
   protected readonly urls = AppConstants.AppUrls;
 
   constructor() {
-    // Page changes replace the content (and usually the link that was clicked), which would
-    // drop focus to <body> silently. Move it to the new page's heading instead, so keyboard
-    // users continue from there and screen readers announce where they landed.
+    // A page change would drop focus to <body>; move it to the new page's heading instead, so
+    // keyboard and screen-reader users continue from there. Skipped on first load and on
+    // query-only changes (typing in the search box, switching role on the same page).
     let lastPath: string | null = null;
     this.router.events
       .pipe(
-        filter((e): e is NavigationEnd => e instanceof NavigationEnd),
+        filter((e) => e instanceof NavigationEnd),
         takeUntilDestroyed(),
       )
       .subscribe((e) => {
-        const path = e.urlAfterRedirects.split(/[?#]/)[0];
-        const previous = lastPath;
+        const path = pathOf(e.urlAfterRedirects);
+        if (lastPath !== null && lastPath !== path) {
+          afterNextRender(() => this.focusPage(), { injector: this.injector });
+        }
         lastPath = path;
-        // Leave focus alone on first load, and on query-only changes (typing in the search box,
-        // switching role on the same page).
-        if (previous === null || previous === path) return;
-        afterNextRender(() => this.focusPage(), { injector: this.injector });
       });
   }
 
@@ -46,35 +47,22 @@ export class App {
     if (role === this.authService.role()) return;
     this.authService.setRole(role);
     // On the access-denied page, retry the page that was blocked (roleGuard decides again).
-    // Elsewhere, re-evaluate guards for the current page (e.g. demoted to Viewer while on details).
-    const current = this.router.parseUrl(this.router.url);
-    const onRestricted = this.router.url.split(/[?#]/)[0] === this.urls.RESTRICTED;
-    const from: string | undefined = current.queryParams['from'];
-    this.router.navigateByUrl(onRestricted && from ? from : this.router.url, {
-      onSameUrlNavigation: 'reload',
-    });
+    // Elsewhere, re-run the guard for the current page (e.g. demoted to Viewer while on details).
+    const url = this.router.url;
+    const from = this.router.parseUrl(url).queryParams['from'];
+    const target = pathOf(url) === this.urls.RESTRICTED && from ? from : url;
+    this.router.navigateByUrl(target, { onSameUrlNavigation: 'reload' });
   }
 
-  /**
-   * Moves focus to the new page's main heading after a route change. Called via
-   * afterNextRender (see the constructor), so the new page's DOM is already in place.
-   */
+  /** Focuses the new page's <h1> (or <main>), unless the page already placed focus itself. */
   private focusPage(): void {
     const main = document.getElementById('main');
-    if (!main) return;
-
-    // The page may already have placed focus itself (e.g. back on the selected card).
     const active = document.activeElement;
-    if (active && active !== main && main.contains(active)) return;
+    if (!main || (active && active !== main && main.contains(active))) return;
 
-    // Fall back to the <main> landmark for pages without an <h1>.
     const target = main.querySelector<HTMLElement>('h1') ?? main;
-    // Headings and <main> aren't focusable by default. tabindex="-1" lets script focus them
-    // without adding them to the Tab order.
-    if (!target.hasAttribute('tabindex')) {
-      target.setAttribute('tabindex', '-1');
-    }
-    // Keep the router's scroll restoration.
+    // tabindex="-1" makes it focusable by script without adding it to the Tab order.
+    target.setAttribute('tabindex', '-1');
     target.focus({ preventScroll: true });
   }
 }

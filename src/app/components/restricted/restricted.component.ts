@@ -1,7 +1,7 @@
-import { Component, computed, inject, input } from '@angular/core';
+import { Component, inject, input } from '@angular/core';
 import { Router, RouterLink } from '@angular/router';
 import { MatIconModule } from '@angular/material/icon';
-import { AuthService, ROLE_LABELS, Role } from '../../core/services/auth.service';
+import { AuthService } from '../../core/services/auth.service';
 import { AppConstants } from '../../utils/constants';
 
 @Component({
@@ -32,7 +32,7 @@ export class RestrictedComponent {
   protected switchToAdmin(): void {
     this.authService.setRole('admin');
     const target = this.from();
-    const isSafeRelativeUrl = !!target && target.startsWith('/') && !target.startsWith('//');
-    this.router.navigateByUrl(isSafeRelativeUrl ? target : AppConstants.AppUrls.CHARACTERS);
+    const isSafeRelativeUrl = target?.startsWith('/') && !target.startsWith('//');
+    this.router.navigateByUrl(isSafeRelativeUrl ? target! : this.urls.CHARACTERS);
   }
 }
