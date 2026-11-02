@@ -18,7 +18,7 @@ export const appConfig: ApplicationConfig = {
     provideHttpClient(),
     provideRouter(
       routes,
-      // Route params & query params (id, name, page) arrive as signal inputs.
+      // Route params & query params (id, name, from) arrive as signal inputs.
       withComponentInputBinding(),
       // Browser back from details restores the list's scroll position.
       withInMemoryScrolling({ scrollPositionRestoration: 'enabled' }),

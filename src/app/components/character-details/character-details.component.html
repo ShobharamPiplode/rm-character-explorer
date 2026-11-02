@@ -67,7 +67,7 @@
           } @else if (filter()) {
             {{ visibleEpisodes().length }} of {{ allEpisodes().length }} match “{{ filter() }}”
           } @else {
-            {{ allEpisodes().length }} episodes
+            {{ allEpisodes().length }} {{ allEpisodes().length === 1 ? 'episode' : 'episodes' }}
           }
         </p>
       </div>

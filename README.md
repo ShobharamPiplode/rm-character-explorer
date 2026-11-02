@@ -23,7 +23,7 @@ npm test           # Vitest (no spec files yet, see "Possible next steps")
 | Client-side filtering by episode name                  | Free-text, case-insensitive, computed from a signal. Shows "X of Y match" and a no-match state with a Clear button                                                                                                                                         |
 | Admin: all routes; Viewer: list only                   | `roleGuard` (functional `CanActivateFn`) reads `route.data.roles`                                                                                                                                                                                          |
 | Clear error on denial                                  | `/restricted` is a 403 page that shows the blocked URL, with "Back to Character list" and "Switch to Admin" (which goes straight to the blocked page)                                                                                                      |
-| Roles simulated by a hardcoded value                   | `DEFAULT_ROLE = 'admin'` in `auth.service.ts`. A toolbar toggle lets you switch roles to see the rules in action                                                                                                                                           |
+| Roles simulated by a hardcoded value                   | The role starts as `'admin'` in `auth.service.ts`. A toolbar toggle lets you switch roles to see the rules in action                                                                                                                                       |
 
 ## Key decisions & rationale
 
@@ -37,31 +37,30 @@ npm test           # Vitest (no spec files yet, see "Possible next steps")
 
 **Infinite scroll + "Load more" for "ALL characters".** The API returns 20 items per page. Fetching all 42 pages up front would mean about 42 requests before anything shows. Instead the first page shows straight away, and each next page is appended when the bottom of the list scrolls into view (an `IntersectionObserver`), with a "Load more characters" button as a fallback. It works together with the API's `name` filter, and a page is never appended to the wrong search.
 
-**The API's 404 means "no results".** The API answers a search with no matches with a 404. The app treats that as an empty state, not an error. Real failures show a separate error panel with a Retry button, both for the first page and for later pages.
+**The API's 404 means "no results".** The API answers a search with no matches with a 404. The app treats that as an empty state, not an error. Real failures show a separate error panel with a Retry button, both for the first page and for later pages. On the details page, the API's 404 for an unknown id comes without a CORS header, so the browser reports it as status 0; while the browser is online, the page treats that as "Character not found" too, instead of offering a Retry that can never succeed.
 
-**Episodes in a single batched request.** The `/episode/{id}` endpoint accepts a comma-separated list of ids. A character like Rick appears in 51 episodes, so this is 1 request instead of 51. The single-id response is a plain object instead of an array, and `normalizeEpisodes()` handles that case.
+**Episodes in a single batched request.** The `/episode/{id}` endpoint accepts a comma-separated list of ids. A character like Rick appears in 51 episodes, so this is 1 request instead of 51. The single-id response is a plain object instead of an array, so the details page wraps it with `[value].flat()`.
 
 **Authorization lives in route guards, not templates.** Hiding links isn't security. The guard is what actually blocks access, and the UI only gives hints (a lock icon and a Viewer banner). If you change role while you're on a restricted page, the guard runs again (`runGuardsAndResolvers: 'always'` plus a same-URL reload), so a demoted user is moved off the page right away. Switching to Admin on `/restricted` retries the blocked page.
 
 **Angular Material, styled to the UX spec.** Material provides the icons and progress bars. The visible UI follows the design in the UX spec PDF (desktop, tablet and phone): a light theme with one green accent, Inter and Space Grotesk, shared design tokens in `src/styles.scss`, and plain semantic HTML for the table, fields and buttons so they match the spec exactly. Layouts change at 600 px and 1024 px: on phone the role switch becomes a dropdown, list rows become cards and the episodes table becomes a stacked list.
 
-**Accessibility.** The app includes a skip link, `role="status"` live regions for result counts, `role="alert"` on error panels, and cards that are real links (keyboard and middle-click work). Focus moves to the new page's heading after navigation, and back to the opened card when returning to the list. It also uses visible focus rings, a text label next to every status colour, labelled icon-only buttons, page titles per route (the details page uses the character's name), and respects `prefers-reduced-motion`.
+**Accessibility.** The app includes a skip link, `role="status"` live regions for result counts, `role="alert"` on error panels, and cards that are real links (keyboard and middle-click work). Focus goes back to the opened card when returning to the list. It also uses visible focus rings, a text label next to every status colour, labelled icon-only buttons, a page title per route, and respects `prefers-reduced-motion`.
 
 ## Structure
 
 ```
 src/app/
-  app.ts / app.html              toolbar, role switch, focus management
+  app.ts / app.html              toolbar, role switch
   app.routes.ts                  lazy routes + role data
   core/
-    api/rm-api.utils.ts          pure helpers (episode ids, normalize, filter, 404 check)
+    api/rm-api.utils.ts          pure helpers (episode ids from URLs, 404 check)
     guards/role.guard.ts         functional CanActivateFn
     models/                      API types
     services/
       rm-api.service.ts          httpResource-based API access
-      auth.service.ts            role signal (hardcoded default, sessionStorage)
+      auth.service.ts            role signal (starts as Admin, sessionStorage)
       state.service.ts           list cache, selection, view mode
-      app-title.strategy.ts      "<page> · Rick & Morty Character Explorer"
   components/
     character-list/              grid/list, infinite scroll / load more, empty/error states
     character-details/           profile + filterable, paginated episode table
@@ -71,7 +70,7 @@ src/app/
     global-search/               toolbar search -> ?name=
     avatar/                      initials + lazy image
     status-badge/
-  utils/                         constants (URLs, storage keys) + small helpers
+  utils/                         constants (URLs, storage keys) + sessionStorage helpers
 ```
 
 ## Possible next steps

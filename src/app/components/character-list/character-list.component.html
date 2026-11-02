@@ -139,7 +139,7 @@
             </span>
             <span class="row-eps">
               <strong>{{ character.episode.length }}</strong>
-              <small>episodes</small>
+              <small>{{ character.episode.length === 1 ? 'episode' : 'episodes' }}</small>
             </span>
           </a>
         </li>

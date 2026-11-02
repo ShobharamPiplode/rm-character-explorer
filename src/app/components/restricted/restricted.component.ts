@@ -12,7 +12,7 @@ import { AppConstants } from '../../utils/constants';
 })
 /**
  * Access-denied (403) page. roleGuard redirects here when the current role may not open a route,
- * passing the blocked URL and the roles it needs, so the page can explain what was blocked and why.
+ * passing the blocked URL so the page can show what was blocked and offer to switch to Admin.
  */
 export class RestrictedComponent {
   private readonly router = inject(Router);

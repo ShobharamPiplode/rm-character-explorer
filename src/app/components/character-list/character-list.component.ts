@@ -92,7 +92,8 @@ export class CharacterListComponent {
   /** e.g. "826 characters" or "107 results for “rick”". */
   private readonly countText = computed(() => {
     const count = this.total().toLocaleString();
-    return this.name() ? `${count} results for “${this.name()}”` : `${count} characters`;
+    const results = this.total() === 1 ? 'result' : 'results';
+    return this.name() ? `${count} ${results} for “${this.name()}”` : `${count} characters`;
   });
   /** Visible status line above the list. */
   protected readonly summary = computed(
@@ -179,7 +180,8 @@ export class CharacterListComponent {
   /** Same accessible name in grid and list view: everything the card shows, plus access. */
   protected linkLabel(character: Character): string {
     const access = this.authService.isAdmin() ? 'view details' : 'details restricted to Admin';
-    return `${character.name}, ${character.status}, ${character.species}, ${character.gender}, ${character.episode.length} episodes, ${access}`;
+    const episodes = character.episode.length === 1 ? 'episode' : 'episodes';
+    return `${character.name}, ${character.status}, ${character.species}, ${character.gender}, ${character.episode.length} ${episodes}, ${access}`;
   }
 
   /** Switches between grid and list layout; the choice is kept in StateService. */

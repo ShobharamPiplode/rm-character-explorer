@@ -7,6 +7,7 @@ import {
   linkedSignal,
   numberAttribute,
 } from '@angular/core';
+import { HttpErrorResponse } from '@angular/common/http';
 import { RouterLink } from '@angular/router';
 import { MatIconModule } from '@angular/material/icon';
 import { MatProgressBarModule } from '@angular/material/progress-bar';
@@ -80,10 +81,16 @@ export class CharacterDetailsComponent {
     const start = this.pageIndex() * EPISODES_PER_PAGE;
     return `${start + 1}–${Math.min(start + EPISODES_PER_PAGE, total)} of ${total}`;
   });
-  /** True for an invalid id, or when the API returns 404 for it (shows the "not found" state). */
-  protected readonly characterNotFound = computed(
-    () => this.id() === 0 || isNotFound(this.character.error()),
-  );
+  /**
+   * True for an invalid id, or when the API says the id doesn't exist (shows the "not found" state).
+   * That 404 comes without a CORS header, so the browser reports status 0 instead; while online,
+   * treat status 0 as "not found" too, otherwise it would show a Retry that can never succeed.
+   */
+  protected readonly characterNotFound = computed(() => {
+    const error = this.character.error();
+    const blocked = error instanceof HttpErrorResponse && error.status === 0 && navigator.onLine;
+    return this.id() === 0 || isNotFound(error) || blocked;
+  });
 
   constructor() {
     // Keep the list's "selected" highlight in sync even when arriving by deep link.
