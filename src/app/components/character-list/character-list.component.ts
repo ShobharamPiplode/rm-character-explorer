@@ -167,11 +167,16 @@ export class CharacterListComponent {
       if (restored || id == null || !this.results().length) return;
       restored = true;
       const item = document.getElementById(`character-${id}`);
-      item?.scrollIntoView({ block: 'center' });
+      // Wait a tick: the router's own scroll-to-top (withInMemoryScrolling) would undo it otherwise.
+      setTimeout(() => item?.scrollIntoView({ block: 'center' }));
       // Put keyboard focus back on the card the user opened, unless they are busy elsewhere
       // (e.g. typing in the header search, which also lands here).
       const active = document.activeElement;
-      if (!active || active === document.body || document.getElementById('main')?.contains(active)) {
+      if (
+        !active ||
+        active === document.body ||
+        document.getElementById('main')?.contains(active)
+      ) {
         item?.querySelector('a')?.focus({ preventScroll: true });
       }
     });
