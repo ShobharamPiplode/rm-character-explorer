@@ -11,19 +11,19 @@ npm test           # Vitest (no spec files yet, see "Possible next steps")
 
 ## Requirements → implementation
 
-| Requirement | Where / how |
-|---|---|
-| View **all** characters, list **or** grid | `components/character-list` pages through all 826 characters (42 API pages) with infinite scroll plus a "Load more characters" button, and has a Grid/List toggle |
-| Name, status, species, gender, total episodes | Character card. Total episodes = `character.episode.length`, so no extra request is needed |
-| Avatar (optional) | `shared/components/avatar`: initials on a tint that stays the same for each character, with the API image (`NgOptimizedImage`, lazy-loaded) on top. Fixed size, so the layout doesn't jump, and no broken-image icon if it fails |
+| Requirement                                            | Where / how                                                                                                                                                                                                                                                |
+| ------------------------------------------------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| View **all** characters, list **or** grid              | `components/character-list` pages through all 826 characters (42 API pages) with infinite scroll plus a "Load more characters" button, and has a Grid/List toggle                                                                                          |
+| Name, status, species, gender, total episodes          | Character card. Total episodes = `character.episode.length`, so no extra request is needed                                                                                                                                                                 |
+| Avatar (optional)                                      | `shared/components/avatar`: initials on a tint that stays the same for each character, with the API image (`NgOptimizedImage`, lazy-loaded) on top. Fixed size, so the layout doesn't jump, and no broken-image icon if it fails                           |
 | Preserve selection state between navigation (optional) | The search term is in the URL. `StateService` keeps the characters loaded so far, the last selected character and the last search. When you come back, the same list is shown without re-fetching, and the selected card is scrolled into view and focused |
-| Global search by name | `shared/components/global-search` sits in the toolbar and updates `?name=` with a 350 ms debounce. It works from any page and stays in sync with back/forward |
-| Details on a dedicated route | `/characters/:id`. Invalid or unknown ids show a "Character not found" state |
-| Episode table: name, air_date, episode | Semantic `<table>`, 10 episodes per page. All episodes come from **one** request: `/episode/1,2,3` |
-| Client-side filtering by episode name | Free-text, case-insensitive, computed from a signal. Shows "X of Y match" and a no-match state with a Clear button |
-| Admin: all routes; Viewer: list only | `roleGuard` (functional `CanActivateFn`) reads `route.data.roles` |
-| Clear error on denial | `/restricted` is a 403 page that shows the blocked URL, with "Back to Character list" and "Switch to Admin" (which goes straight to the blocked page) |
-| Roles simulated by a hardcoded value | `DEFAULT_ROLE = 'admin'` in `auth.service.ts`. A toolbar toggle lets you switch roles to see the rules in action |
+| Global search by name                                  | `shared/components/global-search` sits in the toolbar and updates `?name=` with a 350 ms debounce. It works from any page and stays in sync with back/forward                                                                                              |
+| Details on a dedicated route                           | `/characters/:id`. Invalid or unknown ids show a "Character not found" state                                                                                                                                                                               |
+| Episode table: name, air_date, episode                 | Semantic `<table>`, 10 episodes per page. All episodes come from **one** request: `/episode/1,2,3`                                                                                                                                                         |
+| Client-side filtering by episode name                  | Free-text, case-insensitive, computed from a signal. Shows "X of Y match" and a no-match state with a Clear button                                                                                                                                         |
+| Admin: all routes; Viewer: list only                   | `roleGuard` (functional `CanActivateFn`) reads `route.data.roles`                                                                                                                                                                                          |
+| Clear error on denial                                  | `/restricted` is a 403 page that shows the blocked URL, with "Back to Character list" and "Switch to Admin" (which goes straight to the blocked page)                                                                                                      |
+| Roles simulated by a hardcoded value                   | `DEFAULT_ROLE = 'admin'` in `auth.service.ts`. A toolbar toggle lets you switch roles to see the rules in action                                                                                                                                           |
 
 ## Key decisions & rationale
 
@@ -75,4 +75,5 @@ src/app/
 ```
 
 ## Possible next steps
+
 - TODO

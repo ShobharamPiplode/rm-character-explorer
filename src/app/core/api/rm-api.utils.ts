@@ -14,7 +14,7 @@ export function episodeIdsFromUrls(urls: readonly string[]): number[] {
 /** The multi-id endpoint returns an object (not an array) when only one id is requested. */
 export function normalizeEpisodes(response: Episode | Episode[] | undefined): Episode[] {
   if (!response) {
-    return []; 
+    return [];
   }
   return Array.isArray(response) ? response : [response];
 }
@@ -24,7 +24,7 @@ export function filterEpisodesByName(episodes: readonly Episode[], searchTerm: s
   const needle = searchTerm.trim().toLowerCase();
   if (!needle) {
     return [...episodes];
-  } 
+  }
   return episodes.filter((e) => e.name.toLowerCase().includes(needle));
 }
 

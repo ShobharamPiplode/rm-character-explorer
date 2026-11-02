@@ -127,8 +127,8 @@ export class CharacterListComponent {
       if (!this.characters.hasValue()) return;
       const page = this.characters.value(); // tracked: a new page arrived
       untracked(() => {
-        const req = this.request();  // not tracked
-        const cache = this.stateService.listCache();  // not tracked
+        const req = this.request(); // not tracked
+        const cache = this.stateService.listCache(); // not tracked
         if (!req || !cache || cache.name !== req.name || req.page !== cache.pages + 1) return;
         const existingIds = new Set(cache.results.map((c) => c.id));
         const newResults = page.results.filter((c) => !existingIds.has(c.id));
