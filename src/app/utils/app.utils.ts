@@ -1,9 +1,3 @@
-export const APP_NAME = 'Rick & Morty Character Explorer';
-
-export function pageTitle(page: string | undefined): string {
-  return page ? `${page} · ${APP_NAME}` : APP_NAME;
-}
-
 /** Two-letter initials: "Rick Sanchez" -> "RS", "Alexander" -> "A". */
 export function initialsOf(name: string): string {
   return name

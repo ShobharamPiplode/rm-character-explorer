@@ -5,13 +5,11 @@ import {
 } from '@angular/core';
 import { provideHttpClient } from '@angular/common/http';
 import {
-  TitleStrategy,
   provideRouter,
   withComponentInputBinding,
   withInMemoryScrolling,
 } from '@angular/router';
 import { routes } from './app.routes';
-import { AppTitleStrategy } from './core/services/app-title.strategy';
 
 export const appConfig: ApplicationConfig = {
   providers: [
@@ -25,6 +23,5 @@ export const appConfig: ApplicationConfig = {
       // Browser back from details restores the list's scroll position.
       withInMemoryScrolling({ scrollPositionRestoration: 'enabled' }),
     ),
-    { provide: TitleStrategy, useClass: AppTitleStrategy },
   ],
 };

@@ -15,7 +15,6 @@ import { RmApiService } from '../../core/services/rm-api.service';
 import { StateService } from '../../core/services/state.service';
 import { AvatarComponent } from '../../shared/components/avatar/avatar';
 import { StatusBadgeComponent } from '../../shared/components/status-badge/status-badge';
-import { pageTitle } from '../../utils/app.utils';
 import { AppConstants } from '../../utils/constants';
 import { normalizeEpisodes, filterEpisodesByName, isNotFound } from '../../core/api/rm-api.utils';
 
@@ -98,9 +97,9 @@ export class CharacterDetailsComponent {
     const title = inject(Title);
     effect(() => {
       if (this.character.hasValue()) {
-        title.setTitle(pageTitle(this.character.value().name));
+        title.setTitle(this.character.value().name);
       } else if (this.characterNotFound()) {
-        title.setTitle(pageTitle('Character not found'));
+        title.setTitle('Character not found');
       }
     });
   }
