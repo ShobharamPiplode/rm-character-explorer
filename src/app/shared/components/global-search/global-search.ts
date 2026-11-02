@@ -86,11 +86,20 @@ export class GlobalSearchComponent {
     });
   }
 
-  /** The current `?name=` when on the characters list, otherwise ''. */
+  /**
+   * The `name` query param of the current URL, or '' when not on the characters list.
+   *
+   * This component lives in the header, outside the router outlet, so it has no
+   * ActivatedRoute for the list page and reads the URL from the Router instead.
+   * `router.url` is parsed into a UrlTree, and the primary outlet's segments are
+   * joined back into a path without the query string or fragment, e.g.
+   *   '/characters?name=rick&page=2'  -> path 'characters'     -> 'rick'
+   *   '/characters/1?name=rick'       -> path 'characters/1'   -> '' (details page)
+   *   '/'                             -> path undefined        -> '' (no primary child)
+   */
   private urlSearchTerm(): string {
-    const url = this.router.url;
-    return url.split(/[?#]/)[0] === AppConstants.AppUrls.CHARACTERS
-      ? (this.router.parseUrl(url).queryParams['name'] ?? '')
-      : '';
+    const tree = this.router.parseUrl(this.router.url);
+    const path = tree.root.children['primary']?.segments.map((s) => s.path).join('/');
+    return `/${path}` === AppConstants.AppUrls.CHARACTERS ? (tree.queryParams['name'] ?? '') : '';
   }
 }
