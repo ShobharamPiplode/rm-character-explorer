@@ -89,20 +89,27 @@ export class CharacterDetailsComponent {
   constructor() {
     // Keep the list's "selected" highlight in sync even when arriving by deep link.
     effect(() => {
-      if (this.id() > 0) this.stateService.selectedCharacterId.set(this.id());
+      if (this.id() > 0) {
+        this.stateService.selectedCharacterId.set(this.id());
+      }
     });
 
     // Name the page after the character once it is known (the route title is generic).
     const title = inject(Title);
     effect(() => {
-      if (this.character.hasValue()) title.setTitle(pageTitle(this.character.value().name));
-      else if (this.characterNotFound()) title.setTitle(pageTitle('Character not found'));
+      if (this.character.hasValue()) {
+        title.setTitle(pageTitle(this.character.value().name));
+      } else if (this.characterNotFound()) {
+        title.setTitle(pageTitle('Character not found'));
+      }
     });
   }
 
   /** The pager buttons use aria-disabled (so they keep focus), so clamp here instead. */
   protected goToPage(index: number): void {
-    if (index >= 0 && index < this.pageCount()) this.pageIndex.set(index);
+    if (index >= 0 && index < this.pageCount()) {
+      this.pageIndex.set(index);
+    }
   }
 
   /** Applies the typed filter and jumps back to the first page. */

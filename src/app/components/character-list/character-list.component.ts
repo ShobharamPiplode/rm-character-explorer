@@ -109,13 +109,14 @@ export class CharacterListComponent {
     // (coming back from the details page), in which case nothing is re-fetched. A cache with no
     // pages (first page failed or found no matches) is refetched, so its message/Retry come back.
     effect(() => {
-      const name = this.name();
+      const name = this.name(); // tracked: the only trigger
       untracked(() => {
-        const cache = this.stateService.listCache();
+        const cache = this.stateService.listCache(); // not tracked
         if (cache?.name === name && cache.pages > 0) {
           this.request.set(null);
           return;
         }
+        // writes the same signal value on every name change, but that's a no-op for the signal and the API request.
         this.stateService.listCache.set({ name, pages: 0, totalPages: 0, count: 0, results: [] });
         this.request.set({ name, page: 1 });
       });
@@ -124,10 +125,10 @@ export class CharacterListComponent {
     // Append each page as it arrives, deduplicating to avoid duplicate key issues in @for.
     effect(() => {
       if (!this.characters.hasValue()) return;
-      const page = this.characters.value();
+      const page = this.characters.value(); // tracked: a new page arrived
       untracked(() => {
-        const req = this.request();
-        const cache = this.stateService.listCache();
+        const req = this.request();  // not tracked
+        const cache = this.stateService.listCache();  // not tracked
         if (!req || !cache || cache.name !== req.name || req.page !== cache.pages + 1) return;
         const existingIds = new Set(cache.results.map((c) => c.id));
         const newResults = page.results.filter((c) => !existingIds.has(c.id));
