@@ -7,7 +7,6 @@ import {
   linkedSignal,
   numberAttribute,
 } from '@angular/core';
-import { Title } from '@angular/platform-browser';
 import { RouterLink } from '@angular/router';
 import { MatIconModule } from '@angular/material/icon';
 import { MatProgressBarModule } from '@angular/material/progress-bar';
@@ -90,16 +89,6 @@ export class CharacterDetailsComponent {
     effect(() => {
       if (this.id() > 0) {
         this.stateService.selectedCharacterId.set(this.id());
-      }
-    });
-
-    // Name the page after the character once it is known (the route title is generic).
-    const title = inject(Title);
-    effect(() => {
-      if (this.character.hasValue()) {
-        title.setTitle(this.character.value().name);
-      } else if (this.characterNotFound()) {
-        title.setTitle('Character not found');
       }
     });
   }
